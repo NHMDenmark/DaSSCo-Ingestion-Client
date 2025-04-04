@@ -40,13 +40,13 @@ const logout = () : Promise<void> => _kc.logout();
 
 const hasRole = (roles: string[]) : boolean => roles.some((role: any) => _kc.hasRealmRole(role));
 
-const refreshToken = (successCallBack: () => any) => {
-    _kc.updateToken(5).then(successCallBack).catch(_kc.login);
+const refreshToken = async() : Promise<boolean> => {
+    return await _kc.updateToken(5);
 }
 
 const isLoggedIn = () => _kc.authenticated;
 
-const getToken = () => _kc.token;
+const getToken = () : string => _kc.token as string;
 
 const getLoginUrl = () : string => {
     return _kc.createLoginUrl()

@@ -10,7 +10,9 @@ interface IngestionFormValues {
     funding: string;
     prepType: string;
     payloadType: string;
-    digitiser: string;
+    imager: string;
+    ingestor: string;
+    otherDigitisers: string[];
 }
 
 export const [IngestionFormProvider, useIngestionFormContext, useIngestionForm] = createFormContext<IngestionFormValues>();

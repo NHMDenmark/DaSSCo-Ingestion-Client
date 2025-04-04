@@ -1,63 +1,115 @@
-import { Center, Group, Select, Text } from '@mantine/core'
+import { Center, Group, MultiSelect, Select, Text, TextInput } from '@mantine/core'
 import { useIngestionFormContext } from '../ingestion.form.context'
-import { useQuery } from 'react-query';
-import { APIService } from '@renderer/services/APIService';
-import CenterLoader from '@renderer/components/loader/CenterLoader';
-import { Dispatch, SetStateAction, useEffect } from 'react';
+import { useQuery } from 'react-query'
+import { APIService } from '@renderer/services/APIService'
+import CenterLoader from '@renderer/components/loader/CenterLoader'
+import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react'
+import { useKeycloakAdmin } from '@renderer/hooks/useKeycloakAdmin'
+import UserRepresentation from '@keycloak/keycloak-admin-client/lib/defs/userRepresentation'
 
 interface IMetadataFormProps {
-  setDisabled: Dispatch<SetStateAction<boolean>>;
+  setDisabled: Dispatch<SetStateAction<boolean>>
 }
 
+const metadataFields = [
+  { key: 'institution', label: 'Institution' },
+  { key: 'collection', label: 'Collection' },
+  { key: 'pipeline', label: 'Pipeline' },
+  { key: 'fileFormat', label: 'File Format' },
+  { key: 'funding', label: 'Funding' },
+  { key: 'prepType', label: 'Preparation Type' },
+  { key: 'payloadType', label: 'Payload Type' }
+]
 
 const MetadataForm = (props: IMetadataFormProps): JSX.Element => {
+  const form = useIngestionFormContext()
+  const { authenticated, getDigitisers } = useKeycloakAdmin()
+  const [digitisers, setDigitisers] = useState<UserRepresentation[]>([])
 
-  const form = useIngestionFormContext();
+  const { data, isLoading, isError } = useQuery('options', APIService.getOptions)
 
-  const { data, isLoading, isError } = useQuery('options', APIService.getOptions);
+  const digitiserOptions = useMemo(() => {
+    const options = digitisers.map((digitiser: UserRepresentation) =>
+      `${digitiser.firstName || ''} ${digitiser.lastName || ''}`.trim()
+    )
+
+    const currentImager = form.getValues().imager
+    if (currentImager && !options.some((option) => option === currentImager)) {
+      options.push(currentImager)
+    }
+
+    return options
+  }, [digitisers, form.getValues().imager])
+
+  const onWorkstationChange = (workstationName: string | null) => {
+    const selectedWorkstation = data?.workstations?.find((w: any) => w.name === workstationName)
+
+    form.setValues({
+      workstation: selectedWorkstation.name,
+      institution: selectedWorkstation.institution,
+      collection: selectedWorkstation.collection_name,
+      pipeline: selectedWorkstation.pipeline_name,
+      fileFormat: selectedWorkstation.file_format,
+      funding: selectedWorkstation.funding,
+      prepType: selectedWorkstation.preparation_type,
+      payloadType: selectedWorkstation.payload_type
+    })
+  }
+
+  useEffect(() => {
+    if (authenticated) {
+      const fetchDigiters = async () => {
+        const digitisers = await getDigitisers()
+        setDigitisers(digitisers)
+      }
+      console.log(digitisers)
+      fetchDigiters()
+    }
+  }, [authenticated])
 
   useEffect(() => {
     if (isLoading || isError) {
-      props.setDisabled(true);
+      props.setDisabled(true)
     } else {
-      props.setDisabled(false);
+      props.setDisabled(false)
     }
-  }, [isLoading, isError, props]);
+  }, [isLoading, isError, props])
 
-  if(isLoading) {
-    return <CenterLoader/>;
+  if (isLoading) {
+    return <CenterLoader />
   }
-    
-  if(isError) {
-    return <>
-      <Center>
-        <Text c="red">Something went wrong. The API service is most likely down.</Text>
-      </Center>
-    </>
-  } 
+
+  if (isError) {
+    return (
+      <>
+        <Center>
+          <Text c="red">Something went wrong. The API service is most likely down.</Text>
+        </Center>
+      </>
+    )
+  }
 
   return (
     <Center>
       <Group maw={500} mt={2} gap="xl">
-        <Select label="Workstation" data={data.workstations} allowDeselect={false} {...form.getInputProps('workstation')}/>
-        <Select label="Institution" data={data.institutions} allowDeselect={false} {...form.getInputProps('institution')} />
-        <Select label="Collection" data={data.collections} allowDeselect={false} {...form.getInputProps('collection')} />
-        <Select label="Pipeline" data={data.pipelines} allowDeselect={false} {...form.getInputProps('pipeline')} />
-        <Select label="File Format" data={data.file_format} allowDeselect={false} {...form.getInputProps('fileFormat')} />
-        <Select label="Funding" data={data.funding} allowDeselect={false} {...form.getInputProps('funding')} />
         <Select
-          label="Preparation Type"
-          data={data.preparation_type}
+          w={230}
+          label="Workstation"
+          data={data?.workstations.map((w: any) => w.name)}
           allowDeselect={false}
-          {...form.getInputProps('prepType')}
+          {...form.getInputProps('workstation')}
+          onChange={onWorkstationChange}
         />
 
-        <Select
-          label="Payload Type"
-          data={data.payload_type}
-          allowDeselect={false}
-          {...form.getInputProps('payloadType')}
-        />
+        {metadataFields.map(({ key, label }) => (
+          <TextInput
+            w={230}
+            key={form.key(key)}
+            label={label}
+            disabled
+            {...form.getInputProps(key)}
+          />
+        ))}
       </Group>
     </Center>
   )
