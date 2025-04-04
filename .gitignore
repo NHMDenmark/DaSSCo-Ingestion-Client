@@ -6,3 +6,4 @@ out
 .env
 .env.local
 .vscode
+upload-urls.json
