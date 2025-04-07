@@ -5,6 +5,12 @@
     height: rem(60px);
     -webkit-app-region: drag;
     border-bottom: rem(1px) solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background-color: #fff; 
 }
 
 .windowControl {
@@ -25,3 +31,5 @@
 .closeButton:hover {
     background-color: #FF0000;
 }
+
+

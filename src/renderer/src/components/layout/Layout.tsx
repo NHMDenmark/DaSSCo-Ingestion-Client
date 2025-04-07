@@ -9,6 +9,9 @@ const Layout = () => {
     return (
         <Box>
             <Titlebar />
+            <main style={{ paddingTop: "50px"}}>
+
+            </main>
             {
                 KeycloakService.isLoggedIn() ?
                     <Ingestion />
