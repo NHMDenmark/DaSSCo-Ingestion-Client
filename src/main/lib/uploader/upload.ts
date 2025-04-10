@@ -1,4 +1,4 @@
-import { BrowserWindow, IpcMainInvokeEvent } from 'electron'
+import { IpcMainInvokeEvent } from 'electron'
 import * as tus from 'tus-js-client'
 import { createReadStream, ReadStream, remove } from 'fs-extra'
 import { Metadata, FileObject } from '@shared/types'
@@ -10,8 +10,7 @@ export async function uploadFile(
   event: IpcMainInvokeEvent,
   file: FileObject,
   metadata: Metadata,
-  accessToken: string,
-  window: BrowserWindow
+  accessToken: string
 ) {
   return new Promise<void>(async (resolve, reject) => {
     const readStream: ReadStream = createReadStream(file.path)
@@ -55,8 +54,8 @@ export async function uploadFile(
       onProgress: function (bytesUploaded, bytesTotal) {
         var percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2)
 
-        if (!window.isDestroyed()) {
-          event.sender.send('upload-progress', { percentage })
+        if (!event.sender.isDestroyed()) {
+          event.sender.send('upload-progress', { percentage });
         }
       },
       onShouldRetry(error, _retryAttempt, _options) {

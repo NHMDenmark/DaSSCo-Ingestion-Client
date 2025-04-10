@@ -1,5 +1,5 @@
 import { BrowserWindowConstructorOptions } from 'electron'
-import icon from '../../resources/icon.ico?asset'
+import icon from '../../resources/icon.png?asset'
 import { join } from 'path'
 
 const HEIGHT = 680
