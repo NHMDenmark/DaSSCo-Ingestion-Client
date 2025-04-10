@@ -11,6 +11,7 @@ interface ContextAPI {
     removeAllListeners(channel: string): void;
     login: (url: string) => void;
     sendMessage: (channel: string, message: string) => void;
+    getAppVersion: () => Promise<string>;
 }
 
 export default ContextAPI;

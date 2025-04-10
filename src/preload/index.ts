@@ -15,7 +15,8 @@ const contextAPI : ContextAPI = {
   onUploadError: (callback: (event: IpcRendererEvent, ...args: any[]) => void) => ipcRenderer.on('upload-error', callback),
   removeAllListeners: ipcRenderer.removeAllListeners.bind(ipcRenderer),
   login: (url: string) => ipcRenderer.invoke('keycloak:login', url),
-  sendMessage: (channel: string, message: string) => ipcRenderer.send(channel, [message])
+  sendMessage: (channel: string, message: string) => ipcRenderer.send(channel, [message]),
+  getAppVersion: () => ipcRenderer.invoke('app:version')
 }
 
 try {

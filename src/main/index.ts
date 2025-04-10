@@ -111,6 +111,9 @@ if (!gotTheLock) {
       })
     })
 
+    ipcMain.handle('app:version', () => {
+      return app.getVersion();
+    })
 
     createWindow()
 
