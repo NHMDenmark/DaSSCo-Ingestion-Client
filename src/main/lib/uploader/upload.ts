@@ -5,6 +5,7 @@ import { Metadata, FileObject } from '@shared/types'
 import { calculateChecksum } from '../checksum'
 import FileUrlStorage from './fileUrlStorage.js'
 import { dirname, join, basename, extname } from 'path'
+import { RAW_FILE_EXTENSIONS } from '@shared/consts'
 
 export async function uploadFile(
   event: IpcMainInvokeEvent,
@@ -93,8 +94,12 @@ async function deleteFiles(filePath: string): Promise<void> {
     const dir = dirname(filePath);
     const filename = basename(filePath, extname(filePath))
     await remove(filePath);
-    await remove(join(dir, `${filename}.raf`))
-    await remove(join(dir, `${filename}.crc3`))
+
+    for(const ext of RAW_FILE_EXTENSIONS) {
+      const rawFilePath = join(dir, `${filename}${ext}`);
+      await remove(rawFilePath);
+    }
+
   } catch(error) {
     console.error('Error deleting file: ' + error);
   }

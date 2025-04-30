@@ -2,8 +2,7 @@ import { readdir } from 'fs-extra'
 import { join, extname, parse } from 'path'
 import { dialog } from 'electron'
 import { FileObject, DirectorySelectionResult, ValidationResult } from '@shared/types'
-
-const allowedExtensions = ['.tif', '.tiff']
+import { RAW_FILE_EXTENSIONS, ALLOWED_FILE_EXTENSIONS } from '@shared/consts'
 
 /**
  * Opens a dialog for the user to select a directory and validates its content.
@@ -43,23 +42,24 @@ export async function selectDirectory(): Promise<DirectorySelectionResult> {
 async function validateDirectory(dirPath: string): Promise<ValidationResult> {
   const files = await readdir(dirPath)
 
-  const tiffFiles = files.filter((file) => allowedExtensions.includes(extname(file).toLowerCase()))
+  const tiffFiles = files.filter((file) => ALLOWED_FILE_EXTENSIONS.includes(extname(file).toLowerCase()))
 
   if (tiffFiles.length === 0) {
     return { isValid: false, errorMessage: 'No TIFF files found in the folder' }
   }
 
-  const rafFiles = files.filter((file) => extname(file).toLowerCase() === '.raf')
-  const crc3Files = files.filter((file) => extname(file).toLowerCase() === '.cr3')
+  const rawFiles = files.filter((file) => RAW_FILE_EXTENSIONS.includes(extname(file).toLowerCase()))
 
-  if (rafFiles.length > 0 && crc3Files.length > 0) {
+  const usedRawExts = new Set(rawFiles.map((file) => extname(file).toLowerCase()))
+
+  if (usedRawExts.size > 1) {
     return { isValid: false, errorMessage: 'Multiple raw file formats detected in folder' }
   }
 
   for (const tiffFile of tiffFiles) {
     const basename = parse(tiffFile).name
 
-    const hasRawFile = rafFiles.includes(basename + '.raf') || crc3Files.includes(basename + '.cr3')
+    const hasRawFile = RAW_FILE_EXTENSIONS.some((ext) => rawFiles.includes(basename + ext))
 
     if (!hasRawFile) {
       return { isValid: false, errorMessage: `File ${tiffFile} has no corresponding raw file` }
@@ -81,7 +81,7 @@ export async function readFiles(dirPath: string): Promise<FileObject[]> {
   const files = await readdir(dirPath)
 
   const filteredFiles = files.filter((file) =>
-    allowedExtensions.includes(extname(file).toLowerCase())
+    ALLOWED_FILE_EXTENSIONS.includes(extname(file).toLowerCase())
   )
 
   const fileObjects: FileObject[] = filteredFiles.map((file) => {
