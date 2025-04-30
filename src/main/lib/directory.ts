@@ -42,13 +42,17 @@ export async function selectDirectory(): Promise<DirectorySelectionResult> {
 async function validateDirectory(dirPath: string): Promise<ValidationResult> {
   const files = await readdir(dirPath)
 
-  const tiffFiles = files.filter((file) => ALLOWED_FILE_EXTENSIONS.includes(extname(file).toLowerCase()))
+  const tiffFiles = files.filter((file) =>
+    ALLOWED_FILE_EXTENSIONS.includes(extname(file).toLowerCase())
+  )
 
   if (tiffFiles.length === 0) {
     return { isValid: false, errorMessage: 'No TIFF files found in the folder' }
   }
 
-  const rawFiles = files.filter((file) => RAW_FILE_EXTENSIONS.includes(extname(file).toLowerCase()))
+  const rawFiles = files
+    .filter((file) => RAW_FILE_EXTENSIONS.includes(extname(file).toLowerCase()))
+    .map((file) => file.toLowerCase())
 
   const usedRawExts = new Set(rawFiles.map((file) => extname(file).toLowerCase()))
 
