@@ -61,7 +61,7 @@ async function validateDirectory(dirPath: string): Promise<ValidationResult> {
   }
 
   for (const tiffFile of tiffFiles) {
-    const basename = parse(tiffFile).name
+    const basename = parse(tiffFile).name.toLowerCase()
 
     const hasRawFile = RAW_FILE_EXTENSIONS.some((ext) => rawFiles.includes(basename + ext))
 
