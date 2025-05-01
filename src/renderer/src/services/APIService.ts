@@ -23,7 +23,7 @@ const getOptions = async() => {
 }
 
 const sendFolderName = async(folderName: string) => {
-  const response = await baseApi.post('/metadata/process-folder', {
+  const response = await baseApi.post('/metadata/folder-process', {
     folderName: folderName,
   });
   return response.data;
