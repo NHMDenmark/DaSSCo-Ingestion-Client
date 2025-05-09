@@ -7,7 +7,7 @@ interface IngestionFormValues {
     collection: string;
     pipeline: string;
     fileFormat: string;
-    funding: string;
+    funding: string[];
     prepType: string;
     payloadType: string;
     imager: string;

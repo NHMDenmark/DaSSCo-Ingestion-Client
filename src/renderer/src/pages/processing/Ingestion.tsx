@@ -28,7 +28,7 @@ const Ingestion = (): JSX.Element => {
       collection: '',
       pipeline: '',
       fileFormat: '',
-      funding: '',
+      funding: ['DaSSCo Tranche 1'],
       prepType: '',
       payloadType: '',
       imager: '',
@@ -86,7 +86,7 @@ const Ingestion = (): JSX.Element => {
           </Stepper.Step>
         </Stepper>
 
-        <Group justify="center" mt={60} p={10}>
+        <Group justify="center" mt={45} p={10}>
           {active !== 0 && !processing && !completed && (
             <Button variant="default" onClick={prevStep} hidden>
               Back

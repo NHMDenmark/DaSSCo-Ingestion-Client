@@ -1,4 +1,4 @@
-import { Center, Group, MultiSelect, Select, Text, TextInput } from '@mantine/core'
+import { Center, Group, Select, TagsInput, Text, TextInput } from '@mantine/core'
 import { useIngestionFormContext } from '../ingestion.form.context'
 import { useQuery } from 'react-query'
 import { APIService } from '@renderer/services/APIService'
@@ -16,7 +16,6 @@ const metadataFields = [
   { key: 'collection', label: 'Collection' },
   { key: 'pipeline', label: 'Pipeline' },
   { key: 'fileFormat', label: 'File Format' },
-  { key: 'funding', label: 'Funding' },
   { key: 'prepType', label: 'Preparation Type' },
   { key: 'payloadType', label: 'Payload Type' }
 ]
@@ -28,21 +27,8 @@ const MetadataForm = (props: IMetadataFormProps): JSX.Element => {
 
   const { data, isLoading, isError } = useQuery('options', APIService.getOptions)
 
-  const digitiserOptions = useMemo(() => {
-    const options = digitisers.map((digitiser: UserRepresentation) =>
-      `${digitiser.firstName || ''} ${digitiser.lastName || ''}`.trim()
-    )
-
-    const currentImager = form.getValues().imager
-    if (currentImager && !options.some((option) => option === currentImager)) {
-      options.push(currentImager)
-    }
-
-    return options
-  }, [digitisers, form.getValues().imager])
-
   const onWorkstationChange = (workstationName: string | null) => {
-    const selectedWorkstation = data?.workstations?.find((w: any) => w.name === workstationName)
+    const selectedWorkstation = data?.workstations?.find((w: any) => w.nickname === workstationName)
 
     form.setValues({
       workstation: selectedWorkstation.name,
@@ -50,7 +36,6 @@ const MetadataForm = (props: IMetadataFormProps): JSX.Element => {
       collection: selectedWorkstation.collection_name,
       pipeline: selectedWorkstation.pipeline_name,
       fileFormat: selectedWorkstation.file_format,
-      funding: selectedWorkstation.funding,
       prepType: selectedWorkstation.preparation_type,
       payloadType: selectedWorkstation.payload_type
     })
@@ -62,7 +47,6 @@ const MetadataForm = (props: IMetadataFormProps): JSX.Element => {
         const digitisers = await getDigitisers()
         setDigitisers(digitisers)
       }
-      console.log(digitisers)
       fetchDigiters()
     }
   }, [authenticated])
@@ -95,7 +79,7 @@ const MetadataForm = (props: IMetadataFormProps): JSX.Element => {
         <Select
           w={230}
           label="Workstation"
-          data={data?.workstations.map((w: any) => w.name)}
+          data={data?.workstations.map((w: any) => w.nickname)}
           allowDeselect={false}
           {...form.getInputProps('workstation')}
           onChange={onWorkstationChange}
@@ -110,6 +94,8 @@ const MetadataForm = (props: IMetadataFormProps): JSX.Element => {
             {...form.getInputProps(key)}
           />
         ))}
+
+        <TagsInput label="Funding" {...form.getInputProps('funding')} />
       </Group>
     </Center>
   )
