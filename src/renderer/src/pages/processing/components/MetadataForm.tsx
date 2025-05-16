@@ -31,6 +31,7 @@ const MetadataForm = (props: IMetadataFormProps): JSX.Element => {
     const selectedWorkstation = data?.workstations?.find((w: any) => w.nickname === workstationName)
 
     form.setValues({
+      workstationNickname: selectedWorkstation.nickname,
       workstation: selectedWorkstation.name,
       institution: selectedWorkstation.institution,
       collection: selectedWorkstation.collection_name,
@@ -81,7 +82,7 @@ const MetadataForm = (props: IMetadataFormProps): JSX.Element => {
           label="Workstation"
           data={data?.workstations.map((w: any) => w.nickname)}
           allowDeselect={false}
-          {...form.getInputProps('workstation')}
+          {...form.getInputProps('workstationNickname')}
           onChange={onWorkstationChange}
         />
 

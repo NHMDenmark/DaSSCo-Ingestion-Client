@@ -3,6 +3,7 @@ import { createFormContext } from '@mantine/form';
 interface IngestionFormValues {
     directoryPath: string;
     workstation: string;
+    workstationNickname: string;
     institution: string;
     collection: string;
     pipeline: string;
