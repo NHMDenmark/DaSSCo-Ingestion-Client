@@ -28,6 +28,7 @@ const Ingestion = (): JSX.Element => {
       collection: '',
       pipeline: '',
       fileFormat: '',
+      workstationNickname: '',
       funding: ['DaSSCo Tranche 1'],
       prepType: '',
       payloadType: '',
