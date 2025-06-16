@@ -12,6 +12,7 @@ interface IMetadataFormProps {
 }
 
 const metadataFields = [
+  { key: 'workstation', label: 'Workstation ID' },
   { key: 'institution', label: 'Institution' },
   { key: 'collection', label: 'Collection' },
   { key: 'pipeline', label: 'Pipeline' },
