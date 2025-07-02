@@ -1,6 +1,6 @@
 import { Image, Group, Text, Button } from "@mantine/core";
 import DaSSCoLogo from "@renderer/assets/img/dassco-logo.png";
-import { IconLogout, IconMinus, IconX } from "@tabler/icons-react";
+import { IconLogout, IconMinus, IconSquare, IconX } from "@tabler/icons-react";
 import TitlebarButton from "./TitlebarButton";
 import { KeycloakService } from "@renderer/services/KeycloakService";
 import classes from "./Titlebar.module.css";
@@ -33,7 +33,7 @@ const Titlebar = () => {
                     }
 
                     <TitlebarButton message="minimizeApp"><IconMinus color="black" width={24} size={16} /></TitlebarButton>
-                    {/* <TitlebarButton message="maximizeApp"><IconSquare color="black" width={34} size={14} /></TitlebarButton> */}
+                    <TitlebarButton message="maximizeApp"><IconSquare color="black" width={34} size={14} /></TitlebarButton>
                     <TitlebarButton message="closeApp"><IconX color="black" width={24} size={18} /></TitlebarButton>
                 </Group>
 
