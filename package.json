@@ -1,7 +1,7 @@
 {
   "name": "dassco-ingestion-client",
   "productName": "DaSSCo Ingestion Client",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "description": "",
   "main": "./out/main/index.js",
   "author": "DaSSCo",
@@ -18,7 +18,7 @@
     "postinstall": "electron-builder install-app-deps",
     "build:unpack": "npm run build && electron-builder --dir",
     "build:win": "npm run build && electron-builder --win",
-    "build:mac": "electron-vite build && electron-builder --mac",
+    "build:mac": "electron-vite build && electron-builder --mac --universal",
     "build:linux": "electron-vite build && electron-builder --linux"
   },
   "dependencies": {
