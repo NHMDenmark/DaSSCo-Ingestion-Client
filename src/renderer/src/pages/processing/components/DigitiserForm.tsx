@@ -33,7 +33,6 @@ const DigitiserForm = (props: IDigitserForm): JSX.Element => {
         const digitisers = await getDigitisers()
         setDigitisers(digitisers)
       }
-      console.log(digitisers)
       fetchDigiters()
     }
   }, [authenticated])

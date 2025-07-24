@@ -11,7 +11,8 @@ export async function uploadFile(
   event: IpcMainInvokeEvent,
   file: FileObject,
   metadata: Metadata,
-  accessToken: string
+  accessToken: string,
+  cleanup: boolean
 ) {
   return new Promise<void>(async (resolve, reject) => {
     const readStream: ReadStream = createReadStream(file.path)
@@ -41,7 +42,7 @@ export async function uploadFile(
 
           console.log(error);
 
-          if(statusCode === 403) {
+          if (statusCode === 403) {
             reject(`${statusCode} Authorization Error`)
           }
 
@@ -69,10 +70,18 @@ export async function uploadFile(
           return true
         }
 
+        if (status === 461) {
+          console.warn('File size mismatch (461) for:', file.name)
+          return true
+        }
+
         return false
       },
       onSuccess: async function () {
-        deleteFiles(file.path);
+        console.log(upload.url)
+        if(cleanup) {
+            deleteFiles(file.path);
+        }
         console.log('Uploaded!')
         resolve()
       },
@@ -95,12 +104,12 @@ async function deleteFiles(filePath: string): Promise<void> {
     const filename = basename(filePath, extname(filePath))
     await remove(filePath);
 
-    for(const ext of RAW_FILE_EXTENSIONS) {
+    for (const ext of RAW_FILE_EXTENSIONS) {
       const rawFilePath = join(dir, `${filename}${ext}`);
       await remove(rawFilePath);
     }
 
-  } catch(error) {
+  } catch (error) {
     console.error('Error deleting file: ' + error);
   }
 }

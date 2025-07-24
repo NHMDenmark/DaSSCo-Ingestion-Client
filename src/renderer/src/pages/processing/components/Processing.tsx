@@ -3,7 +3,6 @@ import { useIngestionFormContext } from '../ingestion.form.context'
 import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { IpcRendererEvent } from 'electron'
 import { KeycloakService } from '@renderer/services/KeycloakService'
-import { APIService } from '@renderer/services/APIService'
 import { FileObject } from '@shared/types'
 import { v4 } from 'uuid'
 import { IconCheck } from '@tabler/icons-react'
@@ -47,7 +46,6 @@ const Processing = (props: IProcessingProps): JSX.Element => {
       // Upload completed
       props.setProcessing(false)
       props.setCompleted(true)
-      // await APIService.sendFolderName(folderName);
     } catch (err) {
       if (err instanceof Error) {
         props.setProcessing(false);
@@ -59,10 +57,12 @@ const Processing = (props: IProcessingProps): JSX.Element => {
   }
 
   const uploadFile = async (file: FileObject, folderName: string) => {
+    const cleanup = form.getValues().workflow === 'NHMD'
     await window.context.uploadFile(
       file,
       { ...form.getValues(), folderName: folderName },
-      KeycloakService.getToken()
+      KeycloakService.getToken(),
+      cleanup
     )
   }
 

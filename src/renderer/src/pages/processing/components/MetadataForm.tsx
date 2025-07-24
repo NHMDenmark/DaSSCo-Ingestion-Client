@@ -3,9 +3,7 @@ import { useIngestionFormContext } from '../ingestion.form.context'
 import { useQuery } from 'react-query'
 import { APIService } from '@renderer/services/APIService'
 import CenterLoader from '@renderer/components/loader/CenterLoader'
-import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react'
-import { useKeycloakAdmin } from '@renderer/hooks/useKeycloakAdmin'
-import UserRepresentation from '@keycloak/keycloak-admin-client/lib/defs/userRepresentation'
+import { Dispatch, SetStateAction, useEffect} from 'react'
 
 interface IMetadataFormProps {
   setDisabled: Dispatch<SetStateAction<boolean>>
@@ -23,9 +21,6 @@ const metadataFields = [
 
 const MetadataForm = (props: IMetadataFormProps): JSX.Element => {
   const form = useIngestionFormContext()
-  const { authenticated, getDigitisers } = useKeycloakAdmin()
-  const [digitisers, setDigitisers] = useState<UserRepresentation[]>([])
-
   const { data, isLoading, isError } = useQuery('options', APIService.getOptions)
 
   const onWorkstationChange = (workstationName: string | null) => {
@@ -42,16 +37,6 @@ const MetadataForm = (props: IMetadataFormProps): JSX.Element => {
       payloadType: selectedWorkstation.payload_type
     })
   }
-
-  useEffect(() => {
-    if (authenticated) {
-      const fetchDigiters = async () => {
-        const digitisers = await getDigitisers()
-        setDigitisers(digitisers)
-      }
-      fetchDigiters()
-    }
-  }, [authenticated])
 
   useEffect(() => {
     if (isLoading || isError) {

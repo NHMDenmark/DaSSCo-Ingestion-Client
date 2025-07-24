@@ -1,6 +1,7 @@
 import { createFormContext } from '@mantine/form';
 
 interface IngestionFormValues {
+    workflow: string;
     directoryPath: string;
     workstation: string;
     workstationNickname: string;

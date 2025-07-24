@@ -9,6 +9,7 @@ import Processing from './components/Processing'
 import { IconFileCode, IconFolderOpen, IconSettingsAutomation, IconUsers } from '@tabler/icons-react'
 import { isNotEmpty } from '@mantine/form'
 import DigitiserForm from './components/DigitiserForm'
+import WorkflowForm from './components/WorkflowForm'
 
 const Ingestion = (): JSX.Element => {
   const { active, prevStep, nextStep, setStep } = useSteps({
@@ -22,6 +23,7 @@ const Ingestion = (): JSX.Element => {
   const form = useIngestionForm({
     mode: 'uncontrolled',
     initialValues: {
+      workflow: 'NHMD',
       directoryPath: '',
       workstation: '',
       institution: '',
@@ -37,7 +39,7 @@ const Ingestion = (): JSX.Element => {
       otherDigitisers: []
     },
     validate: {
-      workstation: isNotEmpty(''),
+      workstationNickname: isNotEmpty(''),
       imager: isNotEmpty('')
     }
   })
@@ -52,8 +54,8 @@ const Ingestion = (): JSX.Element => {
   const handleNextStep = () => {
     let isError: boolean = false
 
-    if (active == 1) isError = form.validateField('workstation').hasError
-    if (active == 2) isError = form.validateField('imager').hasError
+    if (active == 2) isError = form.validateField('workstationNickname').hasError
+    if (active == 3) isError = form.validateField('imager').hasError
 
     if (!isError) nextStep()
   }
@@ -61,20 +63,23 @@ const Ingestion = (): JSX.Element => {
   return (
     <IngestionFormProvider form={form}>
       <Stack align="center" mt={50}>
-        <Stepper w={700} active={active} allowNextStepsSelect={false} iconSize={46}>
+        <Stepper w={750} active={active} allowNextStepsSelect={false} iconSize={36} size='sm'>
           <Stepper.Step icon={<IconFolderOpen />} label="Step 1" description="Select folder">
             <DirectorySelector disabled={disabled} setDisabled={setDisabled} />
           </Stepper.Step>
-          <Stepper.Step icon={<IconFileCode />} label="Step 2" description="Metadata">
+          <Stepper.Step icon={<IconFolderOpen />} label="Step 2" description="Select workflow">
+            <WorkflowForm/>
+          </Stepper.Step>
+          <Stepper.Step icon={<IconFileCode />} label="Step 3" description="Metadata">
             <MetadataForm setDisabled={setDisabled} />
           </Stepper.Step>
-          <Stepper.Step icon={<IconUsers />} label="Step 3" description="Digitisers">
+          <Stepper.Step icon={<IconUsers />} label="Step 4" description="Digitisers">
             <DigitiserForm setDisabled={setDisabled} />
           </Stepper.Step>
           <Stepper.Step
             loading={processing}
             icon={<IconSettingsAutomation />}
-            label="Step 4"
+            label="Step 5"
             description="Processing"
           >
             <Processing
@@ -93,14 +98,14 @@ const Ingestion = (): JSX.Element => {
               Back
             </Button>
           )}
-          {active !== 3 && (
+          {active !== 4 && (
             <Button onClick={handleNextStep} disabled={disabled}>
               Next
             </Button>
           )}
         </Group>
 
-{/* 
+        {/* 
         <Group justify="center" mt={480} pos="absolute" left={0} right={0}>
                     {active !== 0 && (!processing && !completed) && <Button variant="default" onClick={prevStep} hidden>Back</Button>}
                     {active !== 2 && <Button onClick={handleNextStep} disabled={disabled}>Next</Button>}

@@ -8,7 +8,7 @@ if(!process.contextIsolated) {
 
 const contextAPI : ContextAPI = {
   selectDirectory: () => ipcRenderer.invoke('selectDirectory'),
-  uploadFile: (file: FileObject, metadata: Metadata, accessToken: string) => ipcRenderer.invoke('uploadFiles', file, metadata, accessToken),
+  uploadFile: (file: FileObject, metadata: Metadata, accessToken: string, cleanup: boolean) => ipcRenderer.invoke('uploadFiles', file, metadata, accessToken, cleanup),
   readFiles: (dirPath: string) => ipcRenderer.invoke('readFiles', dirPath),
   onUploadProgress: (callback: (event: IpcRendererEvent, ...args: any[]) => void) => ipcRenderer.on('upload-progress', callback),
   onUploadCompleted: (callback: (event: IpcRendererEvent, ...args: any[]) => void) => ipcRenderer.on('upload-completed', callback),
