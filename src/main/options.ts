@@ -2,7 +2,7 @@ import { BrowserWindowConstructorOptions } from 'electron'
 import icon from '../../resources/icon.png?asset'
 import { join } from 'path'
 
-const HEIGHT = 710
+const HEIGHT = 660
 const WIDTH = 800
 
 const options: BrowserWindowConstructorOptions = {
