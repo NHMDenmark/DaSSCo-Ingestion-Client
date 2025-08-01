@@ -21,7 +21,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [macos-latest, windows-latest]
+        os: [macos-14, windows-latest]
 
     steps:
       - name: Check out Git repository
@@ -36,7 +36,7 @@ jobs:
         run: npm install
 
       - name: build-mac
-        if: matrix.os == 'macos-latest'
+        if: matrix.os == 'macos-14'
         run: npm run build:mac
 
       - name: build-win
