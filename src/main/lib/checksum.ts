@@ -1,15 +1,16 @@
 import crc32 from 'crc-32'
-import { ReadStream } from 'fs-extra'
+import { createReadStream } from 'fs-extra'
 
 /**
- * Calculates the CRC32 checksum of a given readable stream.
- * @param stream - A readable stream of the file.
+ * Calculates the CRC32 checksum of a given file.
+ * @param filePath - The path of the file.
  * @returns {Promise<number>} The calculated CRC32 checksum.
  */
-export const calculateChecksum = (stream: ReadStream): Promise<number> => {
+export const calculateChecksum = (filePath: string): Promise<number> => {
   return new Promise((resolve, reject) => {
     let checksum = 0
-
+    const stream = createReadStream(filePath)
+    
     stream.on('data', (chunk) => {
       checksum = crc32.buf(chunk as any, checksum)
     })

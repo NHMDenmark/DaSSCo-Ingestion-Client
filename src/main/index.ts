@@ -4,7 +4,10 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { createAuthWindow } from './auth-process'
 import options from './options'
 import { registerHandlers } from './handlers'
+import log from 'electron-log/main'
 // import { autoUpdater, UpdateInfo } from 'electron-updater';
+
+log.initialize();
 
 let mainWindow: BrowserWindow | null = null
 

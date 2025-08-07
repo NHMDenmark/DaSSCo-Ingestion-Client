@@ -1,6 +1,7 @@
 import { BrowserWindow, ipcMain } from 'electron'
 import { readFiles, selectDirectory } from '@/lib/directory'
 import { uploadFile } from './lib/uploader/upload'
+import log from 'electron-log/main'
 
 export const registerHandlers = (): void => {
   ipcMain.on('minimizeApp', (event) => {
@@ -30,6 +31,7 @@ export const registerHandlers = (): void => {
     try {
       await uploadFile(event, file, metadata, accessToken, cleanup)
     } catch (e: any) {
+      log.info('Error during file upload:', e)
       throw Error(e)
     }
   })

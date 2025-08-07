@@ -6,6 +6,9 @@ import { calculateChecksum } from '../checksum'
 import FileUrlStorage from './fileUrlStorage.js'
 import { dirname, join, basename, extname } from 'path'
 import { RAW_FILE_EXTENSIONS } from '@shared/consts'
+import log from 'electron-log/main'
+import { app } from 'electron'
+import path from 'path'
 
 export async function uploadFile(
   event: IpcMainInvokeEvent,
@@ -15,13 +18,14 @@ export async function uploadFile(
   cleanup: boolean
 ) {
   return new Promise<void>(async (resolve, reject) => {
-    const readStream: ReadStream = createReadStream(file.path)
-    const checksum: number = await calculateChecksum(readStream)
+    const checksum: number = await calculateChecksum(file.path)
 
-    const uploadUrlStoragePath = './upload-urls.json'
+    const uploadStream: ReadStream = createReadStream(file.path)
+
+    const uploadUrlStoragePath = path.join(app.getPath('userData'), 'upload-urls.json')
     const fileUrlStorage = new FileUrlStorage(uploadUrlStoragePath)
 
-    const upload = new tus.Upload(readStream, {
+    const upload = new tus.Upload(uploadStream, {
       endpoint: import.meta.env.MAIN_VITE_TUS_ENDPOINT,
       urlStorage: fileUrlStorage,
       removeFingerprintOnSuccess: true,
@@ -40,8 +44,6 @@ export async function uploadFile(
           const statusCode = error.originalResponse?.getStatus()
           // const errorMessage = error.originalResponse?.getBody()
 
-          console.log(error);
-
           if (statusCode === 403) {
             reject(`${statusCode} Authorization Error`)
           }
@@ -51,13 +53,14 @@ export async function uploadFile(
             reject(`Network or Server Error: ${statusCode}`)
           }
         }
+        log.info('Upload error:', error)
         reject(error)
       },
       onProgress: function (bytesUploaded, bytesTotal) {
         var percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2)
 
         if (!event.sender.isDestroyed()) {
-          event.sender.send('upload-progress', { percentage });
+          event.sender.send('upload-progress', { percentage })
         }
       },
       onShouldRetry(error, _retryAttempt, _options) {
@@ -78,19 +81,17 @@ export async function uploadFile(
         return false
       },
       onSuccess: async function () {
-        console.log(upload.url)
-        if(cleanup) {
-            deleteFiles(file.path);
+        if (cleanup) {
+          deleteFiles(file.path)
         }
-        console.log('Uploaded!')
+        log.info(`File: ${file.path} uploaded successfully`)
         resolve()
-      },
+      }
     })
 
     upload.findPreviousUploads().then(function (previousUploads) {
-      console.log('Previous Upload: ' + previousUploads.length)
       if (previousUploads.length) {
-        console.log('FOUND PREVIOUS UPLOAD')
+        log.info('Previous upload found')
         upload.resumeFromPreviousUpload(previousUploads[0])
       }
       upload.start()
@@ -100,16 +101,15 @@ export async function uploadFile(
 
 async function deleteFiles(filePath: string): Promise<void> {
   try {
-    const dir = dirname(filePath);
+    const dir = dirname(filePath)
     const filename = basename(filePath, extname(filePath))
-    await remove(filePath);
+    await remove(filePath)
 
     for (const ext of RAW_FILE_EXTENSIONS) {
-      const rawFilePath = join(dir, `${filename}${ext}`);
-      await remove(rawFilePath);
+      const rawFilePath = join(dir, `${filename}${ext}`)
+      await remove(rawFilePath)
     }
-
   } catch (error) {
-    console.error('Error deleting file: ' + error);
+    log.error('Error deleting files: ' + error)
   }
 }
