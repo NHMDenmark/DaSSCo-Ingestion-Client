@@ -1,6 +1,6 @@
 import { Center, Group, Select, TagsInput, Text, TextInput } from '@mantine/core'
 import { useIngestionFormContext } from '../ingestion.form.context'
-import { useQuery } from 'react-query'
+import { useQuery } from '@tanstack/react-query'
 import { APIService } from '@renderer/services/APIService'
 import CenterLoader from '@renderer/components/loader/CenterLoader'
 import { Dispatch, SetStateAction, useEffect} from 'react'
@@ -21,7 +21,10 @@ const metadataFields = [
 
 const MetadataForm = (props: IMetadataFormProps): JSX.Element => {
   const form = useIngestionFormContext()
-  const { data, isLoading, isError } = useQuery('options', APIService.getOptions)
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['options'],
+    queryFn: APIService.getOptions
+  })
 
   const onWorkstationChange = (workstationName: string | null) => {
     const selectedWorkstation = data?.workstations?.find((w: any) => w.nickname === workstationName)

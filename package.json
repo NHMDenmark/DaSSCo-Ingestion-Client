@@ -29,11 +29,11 @@
     "@mantine/form": "^7.11.2",
     "@mantine/hooks": "^7.11.2",
     "@tabler/icons-react": "^3.11.0",
+    "@tanstack/react-query": "^5.84.1",
     "axios": "^1.7.4",
     "electron-log": "^5.4.2",
     "electron-updater": "^6.1.7",
     "keycloak-js": "^25.0.2",
-    "react-query": "^3.39.3",
     "tus-js-client": "^4.1.0",
     "uuid": "^10.0.0"
   },
