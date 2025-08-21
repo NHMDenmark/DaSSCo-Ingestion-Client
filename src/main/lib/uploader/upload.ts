@@ -42,11 +42,6 @@ export async function uploadFile(
       onError: function (error: Error | tus.DetailedError) {
         if (error instanceof tus.DetailedError) {
           const statusCode = error.originalResponse?.getStatus()
-          // const errorMessage = error.originalResponse?.getBody()
-
-          if (statusCode === 403) {
-            reject(`${statusCode} Authorization Error`)
-          }
 
           // Network or server errror
           if (error.originalRequest) {
@@ -75,6 +70,11 @@ export async function uploadFile(
 
         if (status === 461) {
           console.warn('File size mismatch (461) for:', file.name)
+          return true
+        }
+
+        if(status === 403) {
+          console.warn('Authorizarion Error (403)')
           return true
         }
 

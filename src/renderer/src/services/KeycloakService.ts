@@ -23,7 +23,7 @@ const initKeycloak = (onInitCallBack: () => void) => {
 }
 
 _kc.onTokenExpired = () => {
-    _kc.updateToken(5).then(() => {
+    _kc.updateToken(30).then(() => {
         console.log('token refreshed')
     }).catch(console.error)
 }
@@ -40,8 +40,8 @@ const logout = () : Promise<void> => _kc.logout();
 
 const hasRole = (roles: string[]) : boolean => roles.some((role: any) => _kc.hasRealmRole(role));
 
-const refreshToken = async() : Promise<boolean> => {
-    return await _kc.updateToken(5);
+const refreshToken = async(minValidity = 30) : Promise<boolean> => {
+    return await _kc.updateToken(minValidity);
 }
 
 const isLoggedIn = () => _kc.authenticated;
