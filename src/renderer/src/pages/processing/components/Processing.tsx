@@ -2,7 +2,6 @@ import { Button, Center, Progress, Stack, Text } from '@mantine/core'
 import { useIngestionFormContext } from '../ingestion.form.context'
 import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { IpcRendererEvent } from 'electron'
-import { KeycloakService } from '@renderer/services/KeycloakService'
 import { FileObject } from '@shared/types'
 import { v4 } from 'uuid'
 import { IconCheck } from '@tabler/icons-react'
@@ -31,16 +30,13 @@ const Processing = (props: IProcessingProps): JSX.Element => {
     setErrorMessage(undefined);
     props.setProcessing(true)
     const files = await window.context.readFiles(form.getValues().directoryPath)
-
     const date = new Date()
-
     // The folder the file should be uploaded to
     const folderName = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}_${v4().split('-').slice(0, 2).join('')}`
 
     try {
       for (const [index, file] of files.entries()) {
         setFileProgress({ index: (index + 1), filename: file.name, numberOfFiles: files.length })
-        await KeycloakService.refreshToken();
         await uploadFile(file, folderName)
       }
       // Upload completed
@@ -61,7 +57,6 @@ const Processing = (props: IProcessingProps): JSX.Element => {
     await window.context.uploadFile(
       file,
       { ...form.getValues(), folderName: folderName },
-      KeycloakService.getToken(),
       cleanup
     )
   }

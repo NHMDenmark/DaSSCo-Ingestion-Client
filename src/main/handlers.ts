@@ -2,8 +2,15 @@ import { BrowserWindow, ipcMain } from 'electron'
 import { readFiles, selectDirectory } from '@/lib/directory'
 import { uploadFile } from './lib/uploader/upload'
 import log from 'electron-log/main'
+import { TokenManager } from './lib/token.manager'
 
 export const registerHandlers = (): void => {
+
+  ipcMain.on('auth:update-token', (_event, token: string) => {
+      log.info('Token refreshed')
+      TokenManager.set(token);
+  })
+
   ipcMain.on('minimizeApp', (event) => {
     const win = BrowserWindow.fromWebContents(event.sender)
     win?.minimize()
@@ -27,9 +34,9 @@ export const registerHandlers = (): void => {
 
   ipcMain.handle('readFiles', async (_, dirPath: string) => readFiles(dirPath))
 
-  ipcMain.handle('uploadFiles', async (event, file, metadata, accessToken, cleanup) => {
+  ipcMain.handle('uploadFiles', async (event, file, metadata, cleanup) => {
     try {
-      await uploadFile(event, file, metadata, accessToken, cleanup)
+      await uploadFile(event, file, metadata, cleanup)
     } catch (e: any) {
       log.info('Error during file upload:', e)
       throw Error(e)

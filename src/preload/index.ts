@@ -8,7 +8,7 @@ if(!process.contextIsolated) {
 
 const contextAPI : ContextAPI = {
   selectDirectory: () => ipcRenderer.invoke('selectDirectory'),
-  uploadFile: (file: FileObject, metadata: Metadata, accessToken: string, cleanup: boolean) => ipcRenderer.invoke('uploadFiles', file, metadata, accessToken, cleanup),
+  uploadFile: (file: FileObject, metadata: Metadata, cleanup: boolean) => ipcRenderer.invoke('uploadFiles', file, metadata, cleanup),
   readFiles: (dirPath: string) => ipcRenderer.invoke('readFiles', dirPath),
   onUploadProgress: (callback: (event: IpcRendererEvent, ...args: any[]) => void) => ipcRenderer.on('upload-progress', callback),
   onUploadCompleted: (callback: (event: IpcRendererEvent, ...args: any[]) => void) => ipcRenderer.on('upload-completed', callback),
@@ -24,3 +24,7 @@ try {
 } catch(error) {
   console.log(error);
 }
+
+contextBridge.exposeInMainWorld("auth", {
+    notifyToken: (token: string) => ipcRenderer.send("auth:update-token", token)
+})

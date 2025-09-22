@@ -9,12 +9,12 @@ import { RAW_FILE_EXTENSIONS } from '@shared/consts'
 import log from 'electron-log/main'
 import { app } from 'electron'
 import path from 'path'
+import { TokenManager } from '../token.manager'
 
 export async function uploadFile(
   event: IpcMainInvokeEvent,
   file: FileObject,
   metadata: Metadata,
-  accessToken: string,
   cleanup: boolean
 ) {
   return new Promise<void>(async (resolve, reject) => {
@@ -36,13 +36,21 @@ export async function uploadFile(
         filetype: file.ext,
         ...metadata
       },
-      headers: {
-        Authorization: `Bearer ${accessToken}`
-      },
       onError: function (error: Error | tus.DetailedError) {
         if (error instanceof tus.DetailedError) {
           const statusCode = error.originalResponse?.getStatus()
 
+          if (statusCode === 460) {
+            reject(`Checksum mismatch (460) for: ${file.name}`)
+          }
+
+          if (statusCode === 461) {
+            reject(`File size mismatch (461) for: ${file.name}`)
+          }
+
+          if (statusCode === 403) {
+            reject('Authorizarion Error (403)')
+          }
           // Network or server errror
           if (error.originalRequest) {
             reject(`Network or Server Error: ${statusCode}`)
@@ -63,21 +71,19 @@ export async function uploadFile(
 
         // Reupload if there is a checksum mismatch
         if (status === 460) {
-          console.warn('Checksum mismatch (460) for file:', file.name)
-          //event.sender.send('upload-error', { file: file.name, message: 'Checksum mismatch' })
+          log.warn('Checksum mismatch (460) for file:', file.name)
           return true
         }
 
         if (status === 461) {
-          console.warn('File size mismatch (461) for:', file.name)
+          log.warn('File size mismatch (461) for:', file.name)
           return true
         }
 
-        if(status === 403) {
-          console.warn('Authorizarion Error (403)')
+        if (status === 403) {
+          log.warn('Authorizarion Error (403) for: ', file.name)
           return true
         }
-
         return false
       },
       onSuccess: async function () {
@@ -86,6 +92,9 @@ export async function uploadFile(
         }
         log.info(`File: ${file.path} uploaded successfully`)
         resolve()
+      },
+      onBeforeRequest(req) {
+        req.setHeader('Authorization', `Bearer ${TokenManager.get()}`)
       }
     })
 

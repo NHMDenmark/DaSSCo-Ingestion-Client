@@ -8,6 +8,11 @@ const _kc = new Keycloak({
 
 const redirectUri = 'http://localhost/keycloak-redirect';
 
+const sendTokenToMain = () => {
+    const token = _kc.token;
+    if (token) window.auth?.notifyToken(token);
+}
+
 const initKeycloak = (onInitCallBack: () => void) => {
     _kc.init({
         onLoad: 'check-sso',
@@ -18,6 +23,7 @@ const initKeycloak = (onInitCallBack: () => void) => {
 
     }).then((_authenticated) => {
         if(_authenticated) console.log('User authenticated');
+        sendTokenToMain();
         onInitCallBack();
     }).catch(console.error);
 }
@@ -25,6 +31,7 @@ const initKeycloak = (onInitCallBack: () => void) => {
 _kc.onTokenExpired = () => {
     _kc.updateToken(30).then(() => {
         console.log('token refreshed')
+        sendTokenToMain()
     }).catch(console.error)
 }
 
