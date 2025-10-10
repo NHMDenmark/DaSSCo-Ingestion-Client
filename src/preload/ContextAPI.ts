@@ -1,10 +1,10 @@
 import { IpcRendererEvent } from "electron";
-import { DirectorySelectionResult, FileObject, Metadata } from "@shared/types";
+import { BatchFile, DirectorySelectionResult, FileObject, Metadata } from "@shared/types";
 
 interface ContextAPI {
     selectDirectory(): Promise<DirectorySelectionResult>;
     readFiles(dirPath: string): Promise<FileObject[]>;
-    uploadFile(file: FileObject, metadata: Metadata, cleanup: boolean): Promise<void>;
+    uploadFile(file: BatchFile, metadata: Metadata, cleanup: boolean): Promise<void>;
     onUploadProgress(callback: (event: IpcRendererEvent, ...args: any[]) => void): void;
     onUploadCompleted(callback: (event: IpcRendererEvent, ...args: any[]) => void): void;
     onUploadError(callback: (event: IpcRendererEvent, ...args: any[]) => void): void;

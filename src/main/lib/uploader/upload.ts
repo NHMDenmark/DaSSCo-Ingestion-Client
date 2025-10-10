@@ -1,7 +1,7 @@
 import { IpcMainInvokeEvent } from 'electron'
 import * as tus from 'tus-js-client'
 import { createReadStream, ReadStream, remove } from 'fs-extra'
-import { Metadata, FileObject } from '@shared/types'
+import { Metadata, BatchFile } from '@shared/types'
 import { calculateChecksum } from '../checksum'
 import FileUrlStorage from './fileUrlStorage.js'
 import { dirname, join, basename, extname } from 'path'
@@ -13,7 +13,7 @@ import { TokenManager } from '../token.manager'
 
 export async function uploadFile(
   event: IpcMainInvokeEvent,
-  file: FileObject,
+  file: BatchFile,
   metadata: Metadata,
   cleanup: boolean
 ) {

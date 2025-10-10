@@ -2,7 +2,7 @@ import { Button, Center, Progress, Stack, Text } from '@mantine/core'
 import { useIngestionFormContext } from '../ingestion.form.context'
 import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { IpcRendererEvent } from 'electron'
-import { FileObject } from '@shared/types'
+import { BatchFile, FileObject } from '@shared/types'
 import { v4 } from 'uuid'
 import { IconCheck } from '@tabler/icons-react'
 
@@ -22,6 +22,7 @@ interface FileProgress {
 
 const Processing = (props: IProcessingProps): JSX.Element => {
   const form = useIngestionFormContext()
+  const [preparing, setPreparing] = useState<boolean>(true);
   const [uploadProgress, setUploadProgress] = useState<number>(0)
   const [fileProgress, setFileProgress] = useState<FileProgress>()
   const [errorMessage, setErrorMessage] = useState<string>();
@@ -29,30 +30,43 @@ const Processing = (props: IProcessingProps): JSX.Element => {
   const startProcess = async () => {
     setErrorMessage(undefined);
     props.setProcessing(true)
-    const files = await window.context.readFiles(form.getValues().directoryPath)
-    const date = new Date()
-    // The folder the file should be uploaded to
-    const folderName = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}_${v4().split('-').slice(0, 2).join('')}`
 
-    try {
-      for (const [index, file] of files.entries()) {
-        setFileProgress({ index: (index + 1), filename: file.name, numberOfFiles: files.length })
-        await uploadFile(file, folderName)
-      }
-      // Upload completed
-      props.setProcessing(false)
-      props.setCompleted(true)
-    } catch (err) {
-      if (err instanceof Error) {
-        props.setProcessing(false);
-        const idx = err.message.indexOf("Error:");
-        const errorMessage = idx !== -1 ? err.message.substring(idx).trim() : err.message;
-        setErrorMessage(errorMessage);
+    let batch = await window.uploadStore.findActiveBatch(form.getValues().directoryPath)
+
+    if (!batch) {
+      const date = new Date()
+      const batchName = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}_${v4().split('-').slice(0, 2).join('')}`
+      batch = await window.uploadStore.createBatch(form.getValues().directoryPath, batchName)
+    }
+
+    setPreparing(false);
+    while (true) {
+      const next = await window.uploadStore.getNextFile(batch.id);
+      if (!next) break;
+
+      setFileProgress({ index: (next.batchIndex + 1), filename: next.name, numberOfFiles: batch.fileCount })
+
+      try {
+        await window.uploadStore.markFileInProgress(next.id);
+        await uploadFile(next, batch.name)
+        await window.uploadStore.markFileCompleted(next.id);
+      } catch (err) {
+        if (err instanceof Error) {
+          props.setProcessing(false);
+          const idx = err.message.indexOf("Error:");
+          const errorMessage = idx !== -1 ? err.message.substring(idx).trim() : err.message;
+          setErrorMessage(errorMessage);
+        }
+        return;
       }
     }
+
+    await window.uploadStore.markBatchCompleted(batch.id);
+    props.setProcessing(false)
+    props.setCompleted(true)
   }
 
-  const uploadFile = async (file: FileObject, folderName: string) => {
+  const uploadFile = async (file: BatchFile, folderName: string) => {
     const cleanup = form.getValues().workflow === 'NHMD'
     await window.context.uploadFile(
       file,
@@ -66,6 +80,7 @@ const Processing = (props: IProcessingProps): JSX.Element => {
   }
 
   const onCompleted = () => {
+    setPreparing(true);
     props.onCompletedCallback()
   }
 
@@ -98,10 +113,19 @@ const Processing = (props: IProcessingProps): JSX.Element => {
           <Text mt={30} fw={700} ta="center">
             Uploading {fileProgress?.filename} {fileProgress?.index}/{fileProgress?.numberOfFiles}
           </Text>
-          <Progress value={uploadProgress} striped animated />
-          <Text ta="center" mt={5}>
-            {uploadProgress + '%'}
-          </Text>
+
+          {
+            preparing ? <Text ta="center" mt={5}>
+              Preparing upload
+            </Text> :
+              <>
+                <Progress value={uploadProgress} striped animated />
+                <Text ta="center" mt={5}>
+                  {uploadProgress + '%'}
+                </Text>
+              </>
+          }
+
         </Stack>
       )}
 

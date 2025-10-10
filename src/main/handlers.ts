@@ -3,9 +3,9 @@ import { readFiles, selectDirectory } from '@/lib/directory'
 import { uploadFile } from './lib/uploader/upload'
 import log from 'electron-log/main'
 import { TokenManager } from './lib/token.manager'
+import { createBatch, findActiveBatchByDirectory, getNextFile, markBatchCompleted, markFileCompleted, markFileInProgress } from './db'
 
 export const registerHandlers = (): void => {
-
   ipcMain.on('auth:update-token', (_event, token: string) => {
       log.info('Token refreshed')
       TokenManager.set(token);
@@ -42,4 +42,12 @@ export const registerHandlers = (): void => {
       throw Error(e)
     }
   })
+
+  // Upload store handlers
+  ipcMain.handle('upload:createBatch', async(_, path, name) => createBatch(path, name))
+  ipcMain.handle('upload:findActiveBatch', async(_, path) => findActiveBatchByDirectory(path))
+  ipcMain.handle('upload:markBatchCompleted', async(_, id) => markBatchCompleted(id))
+  ipcMain.handle('upload:markFileCompleted', async(_, id) => markFileCompleted(id))
+  ipcMain.handle('upload:markFileInProgress', async(_, id) => markFileInProgress(id))
+  ipcMain.handle('upload:getNextFile', async(_, id) => getNextFile(id))
 }
