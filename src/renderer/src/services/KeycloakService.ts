@@ -8,9 +8,27 @@ const _kc = new Keycloak({
 
 const redirectUri = 'http://localhost/keycloak-redirect';
 
+let refreshTimer: any = null;
+
 const sendTokenToMain = () => {
     const token = _kc.token;
     if (token) window.auth?.notifyToken(token);
+}
+
+const startAutoRefresh = () => {
+    stopAutoRefresh();
+    refreshTimer = setInterval(() => {
+        _kc.updateToken(60).then((refreshed) => {
+            if (refreshed) sendTokenToMain();
+        }).catch(console.error)
+    }, 10000)
+}
+
+const stopAutoRefresh = () => {
+    if (refreshTimer) {
+        clearInterval(refreshTimer)
+        refreshTimer = null;
+    }
 }
 
 const initKeycloak = (onInitCallBack: () => void) => {
@@ -22,40 +40,50 @@ const initKeycloak = (onInitCallBack: () => void) => {
         redirectUri: redirectUri
 
     }).then((_authenticated) => {
-        if(_authenticated) console.log('User authenticated');
+        if (_authenticated) console.log('User authenticated');
         sendTokenToMain();
         onInitCallBack();
     }).catch(console.error);
 }
 
+
+_kc.onAuthSuccess = () => {
+    sendTokenToMain();
+    startAutoRefresh();
+}
+
+_kc.onAuthRefreshSuccess = () => {
+    sendTokenToMain();
+}
+
 _kc.onTokenExpired = () => {
-    _kc.updateToken(30).then(() => {
-        console.log('token refreshed')
-        sendTokenToMain()
+    _kc.updateToken(30).then((refreshed) => {
+        if (refreshed) sendTokenToMain();
+        console.log('token refreshed');
     }).catch(console.error)
 }
 
-const getName = () : string => _kc.tokenParsed?.name;
+const getName = (): string => _kc.tokenParsed?.name;
 
-const getUsername = () : string => _kc.tokenParsed?.preferred_username;
+const getUsername = (): string => _kc.tokenParsed?.preferred_username;
 
-const getEmail = () : string => _kc.tokenParsed?.email;
+const getEmail = (): string => _kc.tokenParsed?.email;
 
-const login = () : Promise<void> => _kc.login();
+const login = (): Promise<void> => _kc.login();
 
-const logout = () : Promise<void> => _kc.logout();
+const logout = (): Promise<void> => _kc.logout();
 
-const hasRole = (roles: string[]) : boolean => roles.some((role: any) => _kc.hasRealmRole(role));
+const hasRole = (roles: string[]): boolean => roles.some((role: any) => _kc.hasRealmRole(role));
 
-const refreshToken = async(minValidity = 30) : Promise<boolean> => {
+const refreshToken = async (minValidity = 30): Promise<boolean> => {
     return await _kc.updateToken(minValidity);
 }
 
 const isLoggedIn = () => _kc.authenticated;
 
-const getToken = () : string => _kc.token as string;
+const getToken = (): string => _kc.token as string;
 
-const getLoginUrl = () : string => {
+const getLoginUrl = (): string => {
     return _kc.createLoginUrl()
 }
 
