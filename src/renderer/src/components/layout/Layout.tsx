@@ -1,5 +1,5 @@
 import { Box } from "@mantine/core";
-import Ingestion from "@renderer/pages/processing/Ingestion";
+import Ingestion from "@renderer/pages/ingest/Ingestion";
 import { KeycloakService } from "@renderer/services/KeycloakService";
 import Login from "@renderer/pages/login/Login";
 import Titlebar from "./components/titlebar/Titlebar";

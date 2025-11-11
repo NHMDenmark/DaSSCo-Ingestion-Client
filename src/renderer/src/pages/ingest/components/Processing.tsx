@@ -67,7 +67,7 @@ const Processing = (props: IProcessingProps): JSX.Element => {
   }
 
   const uploadFile = async (file: BatchFile, folderName: string) => {
-    const cleanup = form.getValues().workflow === 'NHMD'
+    const cleanup = form.getValues().workflow !== 'Test';
     await window.context.uploadFile(
       file,
       { ...form.getValues(), folderName: folderName },

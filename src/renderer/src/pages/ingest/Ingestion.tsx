@@ -16,7 +16,7 @@ const Ingestion = (): JSX.Element => {
     initialStep: 0
   })
 
-  const [disabled, setDisabled] = useState<boolean>(true)
+  const [disabled, setDisabled] = useState<boolean>(false)
   const [processing, setProcessing] = useState<boolean>(false)
   const [completed, setCompleted] = useState<boolean>(false)
 
@@ -39,14 +39,15 @@ const Ingestion = (): JSX.Element => {
       otherDigitisers: []
     },
     validate: {
+      directoryPath: isNotEmpty('Select a folder'),
       workstationNickname: isNotEmpty(''),
+      workflow: isNotEmpty('Select a workflow'),
       imager: isNotEmpty('')
     }
   })
 
   const onCompletedCallback = () => {
     form.reset()
-    setDisabled(true)
     setCompleted(false)
     setStep(0)
   }
@@ -54,8 +55,10 @@ const Ingestion = (): JSX.Element => {
   const handleNextStep = () => {
     let isError: boolean = false
 
-    if (active == 2) isError = form.validateField('workstationNickname').hasError
-    if (active == 3) isError = form.validateField('imager').hasError
+    if (active === 0) isError = form.validateField('workflow').hasError
+    if (active === 1) isError = form.validateField('directoryPath').hasError
+    if (active === 2) isError = form.validateField('workstationNickname').hasError
+    if (active === 3) isError = form.validateField('imager').hasError
 
     if (!isError) nextStep()
   }
@@ -64,11 +67,11 @@ const Ingestion = (): JSX.Element => {
     <IngestionFormProvider form={form}>
       <Stack align="center" mt={50}>
         <Stepper w={750} active={active} allowNextStepsSelect={false} iconSize={36} size='sm'>
-          <Stepper.Step icon={<IconFolderOpen />} label="Step 1" description="Select folder">
-            <DirectorySelector disabled={disabled} setDisabled={setDisabled} />
-          </Stepper.Step>
-          <Stepper.Step icon={<IconFolderOpen />} label="Step 2" description="Select workflow">
+          <Stepper.Step icon={<IconFolderOpen />} label="Step 1" description="Select workflow">
             <WorkflowForm/>
+          </Stepper.Step>
+          <Stepper.Step icon={<IconFolderOpen />} label="Step 2" description="Select folder">
+            <DirectorySelector/>
           </Stepper.Step>
           <Stepper.Step icon={<IconFileCode />} label="Step 3" description="Metadata">
             <MetadataForm setDisabled={setDisabled} />

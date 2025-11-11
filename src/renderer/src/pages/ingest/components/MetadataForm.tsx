@@ -1,4 +1,4 @@
-import { Center, Group, Select, TagsInput, Text, TextInput } from '@mantine/core'
+import { Center, Group, Select, TagsInput, TextInput } from '@mantine/core'
 import { useIngestionFormContext } from '../ingestion.form.context'
 import { useQuery } from '@tanstack/react-query'
 import { APIService } from '@renderer/services/APIService'
@@ -21,7 +21,7 @@ const metadataFields = [
 
 const MetadataForm = (props: IMetadataFormProps): JSX.Element => {
   const form = useIngestionFormContext()
-  const { data, isLoading, isError } = useQuery({
+  const { data, isPending, isError } = useQuery({
     queryKey: ['options'],
     queryFn: APIService.getOptions
   })
@@ -42,25 +42,15 @@ const MetadataForm = (props: IMetadataFormProps): JSX.Element => {
   }
 
   useEffect(() => {
-    if (isLoading || isError) {
+    if (isPending || isError) {
       props.setDisabled(true)
     } else {
       props.setDisabled(false)
     }
-  }, [isLoading, isError, props])
+  }, [isPending, isError, props])
 
-  if (isLoading) {
+  if (isPending) {
     return <CenterLoader />
-  }
-
-  if (isError) {
-    return (
-      <>
-        <Center>
-          <Text c="red">Something went wrong. The API service is most likely down.</Text>
-        </Center>
-      </>
-    )
   }
 
   return (

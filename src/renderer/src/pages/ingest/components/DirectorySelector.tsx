@@ -1,16 +1,11 @@
-import { Box, Button, Center, Stack, Text, Blockquote, List, Collapse } from '@mantine/core'
-import { Dispatch, SetStateAction, useEffect, useState } from 'react'
+import { Box, Button, Center, Stack, Text, Blockquote, List, Collapse, Input } from '@mantine/core'
+import { useState } from 'react'
 import { useIngestionFormContext } from '../ingestion.form.context'
 import ErrorDialog from '@renderer/components/dialog/ErrorDialog'
 import { IconInfoCircle } from '@tabler/icons-react'
 import { useDisclosure } from '@mantine/hooks'
 
-interface IDirectorySelectorProps {
-  disabled: boolean
-  setDisabled: Dispatch<SetStateAction<boolean>>
-}
-
-const DirectorySelector = (props: IDirectorySelectorProps) => {
+const DirectorySelector = () => {
   const form = useIngestionFormContext()
   const [errorMessage, setErrorMessage] = useState<string>()
   const [opened, setOpened] = useState<boolean>(false)
@@ -28,10 +23,6 @@ const DirectorySelector = (props: IDirectorySelectorProps) => {
       setOpened(true)
     }
   }
-
-  useEffect(() => {
-    props.setDisabled(!form.getValues().directoryPath)
-  }, [form.getValues().directoryPath])
 
   return (
     <Box
@@ -51,6 +42,11 @@ const DirectorySelector = (props: IDirectorySelectorProps) => {
             Select Folder
           </Button>
         </Center>
+                {form.errors.directoryPath && (
+          <Center>
+            <Input.Error>{form.errors.directoryPath}</Input.Error>
+          </Center>
+        )}
         {form.getValues().directoryPath && (
           <Text ta="center">
             <b>Selected folder:</b> {form.getValues().directoryPath}

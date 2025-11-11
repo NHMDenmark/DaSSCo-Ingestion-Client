@@ -3,8 +3,7 @@ import { useIngestionFormContext } from '../ingestion.form.context'
 
 const WorkflowForm = () => {
     const form = useIngestionFormContext()
-
-    const workflows = ['NHMD', 'AU']
+    const workflows = ['NHMD', 'AU', 'Test']
 
     return (
         <Center mt={50}>
