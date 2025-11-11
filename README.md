@@ -1,1 +1,1 @@
-# DaSSCo-Ingestion-Client
+# DaSSCo Ingestion Client
