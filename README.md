@@ -95,4 +95,4 @@ npm run build:linux # Linux
 ```
 
 # License
-This project is licensed under the MIT License (See the [LICENSE](./LICENSE) )
+This project is licensed under the [MIT](./LICENSE) license.
