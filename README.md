@@ -28,7 +28,7 @@ It guides the user through a sequence of steps for choosing a workflow, entering
 * Folder-based uploads
 * Metadata selection to associate information with all files in a folder
 * Resumable file uploads using the [tusd](https://tus.github.io/tusd/) protocol
-* Integraton with the DaSSCo Ingestion API
+* Integration with the DaSSCo Ingestion API
 * Automatic retry mechanisms (e.g., checksum mismatches)
 * Support for multiple ingestion workflows
 
