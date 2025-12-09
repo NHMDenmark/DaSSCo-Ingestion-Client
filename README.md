@@ -40,7 +40,7 @@ The latest version of the ingestion client can be found and installed from the [
 ## Development
 
 ### Prerequisites
-To run the ingestion client locally, you need:
+To run the ingestion client for development, you need:
 - Node.js v24
 - Git
 
