@@ -2,9 +2,11 @@ import { Button, Center, Progress, Stack, Text } from '@mantine/core'
 import { useIngestionFormContext } from '../ingestion.form.context'
 import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { IpcRendererEvent } from 'electron'
-import { BatchFile, FileObject } from '@shared/types'
+import { BatchFile, UploadConfig } from '@shared/types'
 import { v4 } from 'uuid'
 import { IconCheck } from '@tabler/icons-react'
+import { useQuery } from '@tanstack/react-query'
+import { APIService } from '@renderer/services/APIService'
 
 interface IProcessingProps {
   processing: boolean
@@ -22,6 +24,15 @@ interface FileProgress {
 
 const Processing = (props: IProcessingProps): JSX.Element => {
   const form = useIngestionFormContext()
+  const workflow = form.getValues().workflow
+
+  const { data, isPending } = useQuery({
+    queryKey: ['stage:ingest'],
+    queryFn: () => {
+      return APIService.getWorkflowStage(workflow, 'ingest')
+    }
+  })
+
   const [preparing, setPreparing] = useState<boolean>(true);
   const [uploadProgress, setUploadProgress] = useState<number>(0)
   const [fileProgress, setFileProgress] = useState<FileProgress>()
@@ -66,13 +77,14 @@ const Processing = (props: IProcessingProps): JSX.Element => {
     props.setCompleted(true)
   }
 
-  const uploadFile = async (file: BatchFile, folderName: string) => {
-    const cleanup = form.getValues().workflow !== 'Test';
-    await window.context.uploadFile(
-      file,
-      { ...form.getValues(), folderName: folderName },
-      cleanup
-    )
+  const uploadFile = async (file: BatchFile, batchName: string) => {
+    const config: UploadConfig = {
+      checksumAlgorithm: data.fixity_algorithm,
+      cleanup: data.delete_after_upload,
+      metadata: { ...form.getValues(), batchName: batchName }
+    }
+    console.log(config)
+    await window.context.uploadFile(file, config)
   }
 
   const handleUploadProgress = (_: IpcRendererEvent, { percentage }: { percentage: string }) => {

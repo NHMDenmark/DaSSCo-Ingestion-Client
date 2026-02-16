@@ -34,9 +34,9 @@ export const registerHandlers = (): void => {
 
   ipcMain.handle('readFiles', async (_, dirPath: string) => readFiles(dirPath))
 
-  ipcMain.handle('uploadFiles', async (event, file, metadata, cleanup) => {
+  ipcMain.handle('uploadFiles', async (event, file, uploadConfig) => {
     try {
-      await uploadFile(event, file, metadata, cleanup)
+      await uploadFile(event, file, uploadConfig)
     } catch (e: any) {
       log.info('Error during file upload:', e)
       throw Error(e)

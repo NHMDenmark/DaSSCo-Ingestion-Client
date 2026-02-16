@@ -23,7 +23,8 @@ const Ingestion = (): JSX.Element => {
   const form = useIngestionForm({
     mode: 'uncontrolled',
     initialValues: {
-      workflow: 'NHMD',
+      workflow: '',
+      workflowVersion: 0,
       directoryPath: '',
       workstation: '',
       institution: '',

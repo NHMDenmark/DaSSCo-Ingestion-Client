@@ -7,3 +7,4 @@ out
 .env.local
 .vscode
 upload-urls.json
+*.mjs

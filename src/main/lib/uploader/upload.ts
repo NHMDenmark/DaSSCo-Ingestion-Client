@@ -1,7 +1,7 @@
 import { IpcMainInvokeEvent } from 'electron'
 import * as tus from 'tus-js-client'
 import { createReadStream, ReadStream, remove } from 'fs-extra'
-import { Metadata, BatchFile } from '@shared/types'
+import { BatchFile, UploadConfig } from '@shared/types'
 import { calculateChecksum } from '../checksum'
 import FileUrlStorage from './fileUrlStorage.js'
 import { dirname, join, basename, extname } from 'path'
@@ -14,11 +14,11 @@ import { TokenManager } from '../token.manager'
 export async function uploadFile(
   event: IpcMainInvokeEvent,
   file: BatchFile,
-  metadata: Metadata,
-  cleanup: boolean
+  config: UploadConfig
 ) {
   return new Promise<void>(async (resolve, reject) => {
-    const checksum: number = await calculateChecksum(file.path)
+    console.log(config.checksumAlgorithm)
+    const checksum: string = await calculateChecksum(file.path, config.checksumAlgorithm)
 
     const uploadStream: ReadStream = createReadStream(file.path)
 
@@ -32,9 +32,10 @@ export async function uploadFile(
       retryDelays: [0, 3000, 5000, 10000, 20000],
       metadata: {
         filename: file.name,
+        fixityAlgorithm: config.checksumAlgorithm as string,
         checksum: checksum.toString(),
         filetype: file.ext,
-        ...metadata
+        ...config.metadata
       },
       onError: function (error: Error | tus.DetailedError) {
         if (error instanceof tus.DetailedError) {
@@ -87,7 +88,7 @@ export async function uploadFile(
         return false
       },
       onSuccess: async function () {
-        if (cleanup) {
+        if (config.cleanup) {
           deleteFiles(file.path)
         }
         log.info(`File: ${file.path} uploaded successfully`)

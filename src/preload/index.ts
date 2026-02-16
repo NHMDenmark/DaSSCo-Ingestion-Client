@@ -1,6 +1,6 @@
 import { contextBridge, IpcRendererEvent, ipcRenderer } from 'electron'
 import ContextAPI from './ContextAPI';
-import { BatchFile, Metadata } from '@shared/types';
+import { BatchFile, UploadConfig } from '@shared/types';
 import UploadStoreAPI from './UploadStoreAPI';
 
 if (!process.contextIsolated) {
@@ -9,7 +9,7 @@ if (!process.contextIsolated) {
 
 const contextAPI: ContextAPI = {
   selectDirectory: () => ipcRenderer.invoke('selectDirectory'),
-  uploadFile: (file: BatchFile, metadata: Metadata, cleanup: boolean) => ipcRenderer.invoke('uploadFiles', file, metadata, cleanup),
+  uploadFile: (file: BatchFile, uploadConfig: UploadConfig) => ipcRenderer.invoke('uploadFiles', file, uploadConfig),
   readFiles: (dirPath: string) => ipcRenderer.invoke('readFiles', dirPath),
   onUploadProgress: (callback: (event: IpcRendererEvent, ...args: any[]) => void) => ipcRenderer.on('upload-progress', callback),
   onUploadCompleted: (callback: (event: IpcRendererEvent, ...args: any[]) => void) => ipcRenderer.on('upload-completed', callback),
