@@ -5,7 +5,7 @@ export type FileObject = {
 }
 
 export type Metadata = {
-    [key: string]: string | string[];
+    [key: string]: any | any[];
 }
 
 export type ValidationResult = {

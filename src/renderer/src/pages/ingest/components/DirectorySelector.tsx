@@ -16,6 +16,7 @@ const DirectorySelector = () => {
 
     if (dirPath) {
       form.setFieldValue('directoryPath', dirPath)
+      form.setFieldValue('preIngestResults', []);
     }
 
     if (errorMessage) {

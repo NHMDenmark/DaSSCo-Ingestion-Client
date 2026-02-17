@@ -3,7 +3,7 @@ import icon from '../../resources/icon.png?asset'
 import { join } from 'path'
 
 const HEIGHT = 660
-const WIDTH = 800
+const WIDTH = 880
 
 const options: BrowserWindowConstructorOptions = {
   height: HEIGHT,

@@ -22,13 +22,44 @@ const getWorkflows = async () => {
   return response.data
 }
 
-const getWorkflowStage = async (workflowName: string, stage: 'pre_ingest' | 'ingest') => {
-  const response = await baseApi.get(`/policies/${workflowName}/stages/${stage}`)
+const getWorkflowStage = async (workflowName: string, workflowVersion: number, stage: 'pre_ingest' | 'ingest') => {
+  const response = await baseApi.get(`/policies/${workflowName}/${workflowVersion}/stages/${stage}`)
+  return response.data
+}
+
+const createPreIngestSession = async (
+  workflowName: string, 
+  workflowVersion: number,
+  workstation: string
+) => {
+  const response = await baseApi.post('/preingest/sessions', {
+    policyName: workflowName,
+    policyVersion: workflowVersion,
+    workstation: workstation
+  })
+  return response.data.sessionId
+}
+
+const addSessionData = async (sessionId: string, key: string, value: any) => {
+  const response = await baseApi.post(`/preingest/sessions/${sessionId}/data`, {
+    key: key,
+    value: value
+  })
+  return response
+}
+
+const startPreIngest = async (sessionId: string) => {
+  const response = await baseApi.post(`/preingest/run`, {
+    sessionId: sessionId
+  })
   return response.data
 }
 
 export const APIService = {
   getOptions,
   getWorkflows,
-  getWorkflowStage
+  getWorkflowStage,
+  startPreIngest,
+  addSessionData,
+  createPreIngestSession
 }

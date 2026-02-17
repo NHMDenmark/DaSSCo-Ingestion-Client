@@ -16,19 +16,47 @@ export async function selectDirectory(): Promise<DirectorySelectionResult> {
   })
 
   const dirPath: string = filePaths[0]
-
-  if (dirPath) {
-    const validation = await validateDirectory(dirPath)
-
-    if (!validation.isValid) {
-      return { dirPath: null, errorMessage: validation.errorMessage }
-    }
-  }
-
   return { dirPath: dirPath }
 }
 
 /**
+ * Reads and filters files from a specified directory based on allowed extensions.
+ * @param dirPath
+ * @returns {Promise<FileObject[]>} An array where each element contains:
+ * - `name`: The filename.
+ * - `path`: The absolute file path.
+ * - `ext`: The file extension.
+ */
+export async function readFiles(dirPath: string, extensions: string[] = []): Promise<FileObject[]> {
+  const files = await readdir(dirPath)
+
+  // We ignore hidden files
+  const visibleFiles = files.filter((file) => !file.startsWith('.'))
+
+  const normalizedExts = extensions.map((ext) =>
+    ext.startsWith('.') ? ext.toLowerCase() : `.${ext.toLowerCase()}`
+  )
+
+  const filteredFiles =
+    normalizedExts.length === 0
+      ? visibleFiles
+      : visibleFiles.filter((file) => normalizedExts.includes(extname(file).toLowerCase()))
+
+  const fileObjects: FileObject[] = filteredFiles.map((file) => {
+    const filePath = join(dirPath, file)
+    const fileExt = extname(filePath)
+    return {
+      name: file,
+      path: filePath,
+      ext: fileExt
+    }
+  })
+
+  return fileObjects
+}
+
+/**
+ * @deprecated This function is no longer used since the introduction of the Job Dispatcher.
  * Validates the content of a directory.
  * Requirements:
  * 1. The directory must have at least one TIFF file.
@@ -39,7 +67,7 @@ export async function selectDirectory(): Promise<DirectorySelectionResult> {
  * - `isValid`: true if the directory fulfills all requirements.
  * - `errorMessage`: An optional error message if validation fails.
  */
-async function validateDirectory(dirPath: string): Promise<ValidationResult> {
+export async function validateDirectory(dirPath: string): Promise<ValidationResult> {
   const files = await readdir(dirPath)
 
   const tiffFiles = files.filter((file) =>
@@ -71,33 +99,4 @@ async function validateDirectory(dirPath: string): Promise<ValidationResult> {
   }
 
   return { isValid: true }
-}
-
-/**
- * Reads and filters files from a specified directory based on allowed extensions.
- * @param dirPath
- * @returns {Promise<FileObject[]>} An array where each element contains:
- * - `name`: The filename.
- * - `path`: The absolute file path.
- * - `ext`: The file extension.
- */
-export async function readFiles(dirPath: string): Promise<FileObject[]> {
-  const files = await readdir(dirPath)
-
-  const filteredFiles = files.filter((file) =>
-    ALLOWED_FILE_EXTENSIONS.includes(extname(file).toLowerCase())
-  )
-
-  const fileObjects: FileObject[] = filteredFiles.map((file) => {
-    const filePath = join(dirPath, file)
-    const fileExt = extname(filePath)
-
-    return {
-      name: file,
-      path: filePath,
-      ext: fileExt
-    }
-  })
-
-  return fileObjects
 }

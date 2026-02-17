@@ -25,11 +25,12 @@ interface FileProgress {
 const Processing = (props: IProcessingProps): JSX.Element => {
   const form = useIngestionFormContext()
   const workflow = form.getValues().workflow
+  const version = form.getValues().workflowVersion
 
   const { data, isPending } = useQuery({
     queryKey: ['stage:ingest'],
     queryFn: () => {
-      return APIService.getWorkflowStage(workflow, 'ingest')
+      return APIService.getWorkflowStage(workflow, version, 'ingest')
     }
   })
 

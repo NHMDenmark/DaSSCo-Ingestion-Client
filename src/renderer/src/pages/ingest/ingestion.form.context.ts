@@ -1,5 +1,7 @@
 import { createFormContext } from '@mantine/form';
 
+export type JobRun = { name: string; success: boolean; value: any; error: string | null }
+
 interface IngestionFormValues {
     workflow: string;
     workflowVersion: number;
@@ -16,6 +18,7 @@ interface IngestionFormValues {
     imager: string;
     ingestor: string;
     otherDigitisers: string[];
+    preIngestResults: JobRun[];
 }
 
 export const [IngestionFormProvider, useIngestionFormContext, useIngestionForm] = createFormContext<IngestionFormValues>();

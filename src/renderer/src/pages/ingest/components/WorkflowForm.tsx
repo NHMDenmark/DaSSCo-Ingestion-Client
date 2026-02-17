@@ -29,6 +29,7 @@ const WorkflowForm = () => {
                     const selected = data.find((w) => w.name === name);
                     if (selected) {
                         form.setFieldValue("workflowVersion", selected.version);
+                        form.setFieldValue('preIngestResults', []);
                     }
                 }}
             />

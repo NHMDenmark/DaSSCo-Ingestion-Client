@@ -6,10 +6,17 @@ import DirectorySelector from './components/DirectorySelector'
 import { useState } from 'react'
 import MetadataForm from './components/MetadataForm'
 import Processing from './components/Processing'
-import { IconFileCode, IconFolderOpen, IconSettingsAutomation, IconUsers } from '@tabler/icons-react'
+import {
+  IconFileCode,
+  IconFolderOpen,
+  IconSettingsAutomation,
+  IconUsers,
+  IconChecklist
+} from '@tabler/icons-react'
 import { isNotEmpty } from '@mantine/form'
 import DigitiserForm from './components/DigitiserForm'
 import WorkflowForm from './components/WorkflowForm'
+import PreIngest from './components/PreIngest'
 
 const Ingestion = (): JSX.Element => {
   const { active, prevStep, nextStep, setStep } = useSteps({
@@ -19,6 +26,7 @@ const Ingestion = (): JSX.Element => {
   const [disabled, setDisabled] = useState<boolean>(false)
   const [processing, setProcessing] = useState<boolean>(false)
   const [completed, setCompleted] = useState<boolean>(false)
+  const [preIngestComplete, setPreIngestComplete] = useState<boolean>(false);
 
   const form = useIngestionForm({
     mode: 'uncontrolled',
@@ -37,7 +45,8 @@ const Ingestion = (): JSX.Element => {
       payloadType: '',
       imager: '',
       ingestor: KeycloakService.getName(),
-      otherDigitisers: []
+      otherDigitisers: [],
+      preIngestResults: []
     },
     validate: {
       directoryPath: isNotEmpty('Select a folder'),
@@ -53,6 +62,10 @@ const Ingestion = (): JSX.Element => {
     setStep(0)
   }
 
+  const handlePreIngestComplete = (success: boolean) => {
+    setPreIngestComplete(success);
+  }
+
   const handleNextStep = () => {
     let isError: boolean = false
 
@@ -61,18 +74,29 @@ const Ingestion = (): JSX.Element => {
     if (active === 2) isError = form.validateField('workstationNickname').hasError
     if (active === 3) isError = form.validateField('imager').hasError
 
+    if(active === 4) {
+      if(!preIngestComplete)
+        return;
+    }
     if (!isError) nextStep()
+  }
+
+  const canGoNext = () => {
+    if(active === 4) {
+      return preIngestComplete;
+    }
+    return !disabled;
   }
 
   return (
     <IngestionFormProvider form={form}>
       <Stack align="center" mt={50}>
-        <Stepper w={750} active={active} allowNextStepsSelect={false} iconSize={36} size='sm'>
+        <Stepper w={850} active={active} allowNextStepsSelect={false} iconSize={36} size="sm">
           <Stepper.Step icon={<IconFolderOpen />} label="Step 1" description="Select workflow">
-            <WorkflowForm/>
+            <WorkflowForm />
           </Stepper.Step>
           <Stepper.Step icon={<IconFolderOpen />} label="Step 2" description="Select folder">
-            <DirectorySelector/>
+            <DirectorySelector />
           </Stepper.Step>
           <Stepper.Step icon={<IconFileCode />} label="Step 3" description="Metadata">
             <MetadataForm setDisabled={setDisabled} />
@@ -80,11 +104,14 @@ const Ingestion = (): JSX.Element => {
           <Stepper.Step icon={<IconUsers />} label="Step 4" description="Digitisers">
             <DigitiserForm setDisabled={setDisabled} />
           </Stepper.Step>
+          <Stepper.Step icon={<IconChecklist/>} label="Step 5" description="Pre-Ingest">
+            <PreIngest onJobsComplete={handlePreIngestComplete}/>
+          </Stepper.Step>
           <Stepper.Step
             loading={processing}
             icon={<IconSettingsAutomation />}
             label="Step 5"
-            description="Processing"
+            description="Transfer"
           >
             <Processing
               processing={processing}
@@ -102,18 +129,12 @@ const Ingestion = (): JSX.Element => {
               Back
             </Button>
           )}
-          {active !== 4 && (
-            <Button onClick={handleNextStep} disabled={disabled}>
+          {active !== 5 && (
+            <Button onClick={handleNextStep} disabled={!canGoNext()}>
               Next
             </Button>
           )}
         </Group>
-
-        {/* 
-        <Group justify="center" mt={480} pos="absolute" left={0} right={0}>
-                    {active !== 0 && (!processing && !completed) && <Button variant="default" onClick={prevStep} hidden>Back</Button>}
-                    {active !== 2 && <Button onClick={handleNextStep} disabled={disabled}>Next</Button>}
-                </Group> */}
       </Stack>
     </IngestionFormProvider>
   )
