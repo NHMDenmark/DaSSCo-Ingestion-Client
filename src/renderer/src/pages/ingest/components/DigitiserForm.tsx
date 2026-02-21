@@ -3,6 +3,7 @@ import { useIngestionFormContext } from '../ingestion.form.context'
 import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { useKeycloakAdmin } from '@renderer/hooks/useKeycloakAdmin'
 import UserRepresentation from '@keycloak/keycloak-admin-client/lib/defs/userRepresentation'
+import { useQuery } from '@tanstack/react-query'
 
 interface IDigitserForm {
   setDisabled: Dispatch<SetStateAction<boolean>>
@@ -11,7 +12,15 @@ interface IDigitserForm {
 const DigitiserForm = (props: IDigitserForm): JSX.Element => {
   const form = useIngestionFormContext()
   const { authenticated, getDigitisers } = useKeycloakAdmin()
-  const [digitisers, setDigitisers] = useState<UserRepresentation[]>([])
+
+  const { data: digitisers = [] } = useQuery({
+    queryKey: ['digitisers'],
+    queryFn: getDigitisers,
+    // Only fetch when authenticated AND adminClient is ready
+    enabled: authenticated,
+    // Cache digitisers for 5 minutes
+    staleTime: 5 * 60 * 1000
+  })
 
   const digitiserOptions = useMemo(() => {
     const options = digitisers.map((digitiser: UserRepresentation) =>
@@ -27,14 +36,7 @@ const DigitiserForm = (props: IDigitserForm): JSX.Element => {
   }, [digitisers, form.getValues().imager])
 
   useEffect(() => {
-    props.setDisabled(false);
-    if (authenticated) {
-      const fetchDigiters = async () => {
-        const digitisers = await getDigitisers()
-        setDigitisers(digitisers)
-      }
-      fetchDigiters()
-    }
+    props.setDisabled(false)
   }, [authenticated])
 
   return (

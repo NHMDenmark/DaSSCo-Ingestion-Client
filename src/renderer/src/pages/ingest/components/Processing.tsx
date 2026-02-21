@@ -48,7 +48,7 @@ const Processing = (props: IProcessingProps): JSX.Element => {
     if (!batch) {
       const date = new Date()
       const batchName = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}_${v4().split('-').slice(0, 2).join('')}`
-      batch = await window.uploadStore.createBatch(form.getValues().directoryPath, batchName)
+      batch = await window.uploadStore.createBatch(form.getValues().directoryPath, batchName, data.included_formats)
     }
 
     setPreparing(false);

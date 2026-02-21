@@ -31,8 +31,8 @@ contextBridge.exposeInMainWorld("auth", {
 })
 
 const uploadStoreAPI: UploadStoreAPI = {
-  createBatch: (directoryPath: string, batchName: string) =>
-    ipcRenderer.invoke('upload:createBatch', directoryPath, batchName),
+  createBatch: (directoryPath: string, batchName: string, includedExtensions: string[]) =>
+    ipcRenderer.invoke('upload:createBatch', directoryPath, batchName, includedExtensions),
   findActiveBatch: (directoryPath: string) => ipcRenderer.invoke('upload:findActiveBatch', directoryPath),
   markBatchCompleted: (batchId: string) => ipcRenderer.invoke('upload:markBatchCompleted', batchId),
   markFileInProgress: (fileId: string) => ipcRenderer.invoke('upload:markFileInProgress', fileId),

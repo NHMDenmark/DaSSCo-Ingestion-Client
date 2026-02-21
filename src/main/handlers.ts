@@ -44,7 +44,7 @@ export const registerHandlers = (): void => {
   })
 
   // Upload store handlers
-  ipcMain.handle('upload:createBatch', async(_, path, name) => createBatch(path, name))
+  ipcMain.handle('upload:createBatch', async(_, path, name, exts) => createBatch(path, name, exts))
   ipcMain.handle('upload:findActiveBatch', async(_, path) => findActiveBatchByDirectory(path))
   ipcMain.handle('upload:markBatchCompleted', async(_, id) => markBatchCompleted(id))
   ipcMain.handle('upload:markFileCompleted', async(_, id) => markFileCompleted(id))

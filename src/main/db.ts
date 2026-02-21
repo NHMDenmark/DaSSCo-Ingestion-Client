@@ -12,6 +12,7 @@ db.exec(initSql);
 export const createBatch = async(
     directoryPath: string,
     batchName: string,
+    includedExtensions: string[] = []
 ): Promise<Batch> => {
     const id = randomUUID()
     const now = Date.now()
@@ -26,7 +27,7 @@ export const createBatch = async(
      VALUES (@id, @batchId, @path, @name, @ext, @batchIndex, 'pending')`
     )
 
-    const files: FileObject[] = await readFiles(directoryPath);
+    const files: FileObject[] = await readFiles(directoryPath, includedExtensions);
 
     const tx = db.transaction(() => {
         insertBatch.run({ id, path: directoryPath, name: batchName, fileCount: files.length, createdAt: now })
